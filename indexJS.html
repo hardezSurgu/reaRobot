@@ -1,0 +1,297 @@
+<html>
+<head>
+	<title>Coding challenge - REA Group Asia</title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="style.css">
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="lib/js/bootbox.min.js"></script>
+</head>
+<body>
+	<div class="centeredDiv w500 mTop2">
+		<h1 >Lil Robo Steps | Version JS</h1>
+	</div>
+	<div class="centeredDiv w500">
+		<button type="button" onclick="move2PHP()" class="btn btn-success btn-md ">Switch to PHP</button>
+	</div>
+	<div class="row w500 centeredDiv " id="tabletop">
+	</div>
+	<div class="row centeredDiv mTop2 w500">
+		<div class="panel panel-primary">
+			<div class="panel-heading">Command <strong>Place</strong>:</div>
+			<div class="panel-body">
+				<div hidden id="msg" class="row alert alert-danger col-lg-12">
+				</div>
+				<div class="row ">
+					<div class="col-lg-3">
+					<label for="placeX">X:</label>
+					<input id="placeX" class="w50" type="number" step="1" value="0">
+					</div>
+					<div class="col-lg-3">
+					<label for="placeY">Y:</label>
+					<input id="placeY" class="w50" type="number" step="1" value="0">
+					</div>
+					<div class="col-lg-6">
+					<label for="direction">Direction:</label>
+					<select id="direction"></select>
+					</div>
+				</div>
+				<button type="button" onclick="placeRobot()" class="btn btn-primary btn-md mTop2">Place Robot</button>
+			</div>
+		</div>
+		<div class="row ml1 row alert alert-danger col-lg-12" hidden id="msg2">
+		</div>
+		<div class="row ml1">
+			<button type="button" onclick="move()" class="btn btn-primary btn-md mTop2">Move Robot</button>
+			<button type="button" onclick="left()" class="btn btn-primary btn-md mTop2">Turn Robot Left</button>
+			<button type="button" onclick="right()" class="btn btn-primary btn-md mTop2">Turn Robot Right</button>
+			<button type="button" onclick="report()" class="btn btn-primary btn-md mTop2">Report</button>
+		</div>
+	</div>
+</body>
+</html>
+<script>
+	var directions = ["NORTH","SOUTH","EAST","WEST"];
+	addSelections(directions);
+	var pictures = ["img/robot_up.png","img/robot_down.png","img/robot_right.png","img/robot_left.png"];
+	function Robot () {
+		this.x = -1;
+		this.y = -1;
+		this.direction = "space";
+		this.picture = pictures[0];
+		this.isPlaced = false;
+		this.place = function(x, y, direction) {
+			this.x = x;
+			this.y = y;
+			this.direction = direction;
+		};
+		this.report = function() {
+			if(this.x==-1 || this.y==-1 || this.direction =='space'){
+				return "Robot is not placed yet!";
+			}else{
+				return 'Robot is in Section ['+this.x + ',' + this.y + '] Faced to ' + this.direction;
+			}
+		};
+		this.updatePicture = function(){
+			switch(this.direction){
+				case directions[0]:
+				this.picture = pictures[0];
+				break;
+				case directions[1]:
+				this.picture = pictures[1];
+				break;
+				case directions[2]:
+				this.picture = pictures[2];
+				break;
+				case directions[3]:
+				this.picture = pictures[3];
+				break;
+			}
+		}
+		this.move = function(){
+			switch (this.direction.toUpperCase()){
+				case "NORTH":
+				this.y= parseInt(this.y) + 1;
+				break;
+				case "SOUTH":
+				this.y= parseInt(this.y) - 1;
+				break;
+				case "EAST":
+				this.x= parseInt(this.x) - 1;
+				break;
+				case "WEST":
+				this.x=parseInt(this.x) + 1;
+				break;
+			}
+		}
+		this.left = function(){
+			switch (this.direction.toUpperCase()){
+				case "NORTH":
+				this.direction = "WEST";
+				break;
+				case "SOUTH":
+				this.direction = "EAST";
+				break;
+				case "EAST":
+				this.direction = "NORTH";
+				break;
+				case "WEST":
+				this.direction = "SOUTH";
+				break;
+			}
+		}
+		this.right = function(){
+			switch (this.direction.toUpperCase()){
+				case "NORTH":
+				this.direction = "EAST";
+				break;
+				case "SOUTH":
+				this.direction = "WEST";
+				break;
+				case "EAST":
+				this.direction = "SOUTH";
+				break;
+				case "WEST":
+				this.direction = "NORTH";
+				break;
+			}
+		}
+	}
+	function Board () {
+		this.dim1 = 5;
+		this.dim2 = 5;
+		this.squares = new Array();
+		this.robot = null;
+		this.getRobot = function(robo) {
+			this.robot = robo;
+		};
+		
+		this.init = function(){
+			var counter=0;
+			var _tabletop = document.getElementById("tabletop");
+			this.getRobot(myRobot);
+			_tabletop.innerHTML = "";
+			for (i=this.dim1-1;i>=0;i--){
+				for (j=this.dim2-1;j>=0;j--){
+				this.squares[i] = new Array();
+					if(counter%2==0){
+						_tabletop.innerHTML+="<div id='sq"+i+j+ "' class='squareBlue'></div>";
+					}else{
+						_tabletop.innerHTML+="<div id='sq"+i+j+ "' class='squareGreen'></div>";
+					}
+					counter++;
+					this.squares[i][j] = document.getElementById('sq'+i+j);
+					console.log(this.squares[i][j].innerHTML);
+				}
+				_tabletop.innerHTML+="</br>";
+			}
+		};
+		
+		this.update = function(){
+			x = this.robot.x;
+			y = this.robot.y;
+			mySquare = document.getElementById('sq'+y+x);
+			mySquare.innerHTML = '<img src="'+this.robot.picture+'" class="rSize m1">';
+		};
+	}
+	var myRobot = new Robot();
+	var myBoard = new Board();
+	myBoard.init();
+	
+	function placeRobot(){
+		myRobot.x = (document.getElementById('placeX').value);
+		myRobot.y = (document.getElementById('placeY').value);
+		myRobot.direction = document.getElementById('direction').value;
+		myRobot.isPlaced = true;
+		if(placeVali(myRobot.x,myRobot.y,myRobot.direction)){
+			myBoard.init();
+			myRobot.updatePicture();
+			myBoard.update();
+		}
+	}
+	function addSelections(directions){
+		dirSelect = document.getElementById('direction');
+		for (i=0;i<directions.length;i++){
+			dirSelect.options[dirSelect.options.length] = new Option(directions[i], directions[i]);
+		}
+	}
+	function placeVali(x,y,dir){
+		var msg = document.getElementById('msg');
+		clear();
+		if(isNaN(x)==false&&isNaN(y)==false&&x!=''&&y!=''&&x>=0&&y>=0&&(Math.floor(x)===+x)&&(Math.floor(y)===+y)){
+			if(x<=(myBoard.dim1-1)&&y<=(myBoard.dim2-1)){
+				return true;
+			}else{
+				msg.style.display = 'inline';
+				msg.innerHTML="X must be less or equal than "+myBoard.dim1+" and Y less or equal than "+myBoard.dim2;
+				return false;
+			}
+		}else {
+			msg.style.display = 'inline';
+			msg.innerHTML="X and Y must be natural numbers!";
+			return false;
+		}
+		return false;
+	}
+	function move(){
+		clear();
+		if(isPlaced()){
+			if(moveVali()){
+				myBoard.init();
+				myRobot.move();
+				myBoard.update();
+			}else{
+				document.getElementById("msg2").style.display = 'inline';
+				document.getElementById("msg2").innerHTML = 'I dont wanna DIE!';
+			}
+		}
+	}
+	function left(){
+		clear();
+		if(isPlaced()){
+			myBoard.init();
+			myRobot.left();
+			myRobot.updatePicture();
+			myBoard.update();
+		}
+	}
+	function right(){
+		clear();
+		if(isPlaced()){
+			myBoard.init();
+			myRobot.right();
+			myRobot.updatePicture();
+			myBoard.update();
+		}
+	}
+	function report(){
+		bootbox.alert(myRobot.report()).find('.modal-content').css({
+			'background-color': '#ffffff',
+			'color': '#000000',
+			'font-size': '1.5em',
+			'margin-top': '50%'
+		});
+	}
+	function moveVali(){
+		switch (myRobot.direction.toUpperCase()){
+			case "NORTH":
+			if (myRobot.y<(myBoard.dim2-1)){
+				return true;
+			}else {return false;}
+			case "SOUTH":
+			if (myRobot.y>0){
+				return true;
+			}else {return false;}
+			case "WEST":
+			if (myRobot.x<(myBoard.dim1-1)){
+				return true;
+			}else {return false;}
+			case "EAST":
+			if (myRobot.x>0){
+				return true;
+			}else {return false;}
+		}
+	}
+	function clear(){
+		document.getElementById("msg").innerHTML = '';
+		document.getElementById("msg").style.display = 'none';
+		document.getElementById("msg2").innerHTML = '';
+		document.getElementById("msg2").style.display = 'none';
+	}
+	function isPlaced(){
+		if(myRobot.isPlaced){
+			return true;
+		}else {
+			document.getElementById("msg2").style.display = 'inline';
+			document.getElementById("msg2").innerHTML = 'First Place a Robot!';
+			return false;
+		}
+	}
+	function move2PHP(){
+		window.location.href = "indexPHP.php";
+	}
+</script>
